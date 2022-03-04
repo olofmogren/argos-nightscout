@@ -32,13 +32,13 @@ ARROW="🠒"
 #echo $DIFF
 if [ $DIFF -gt 12 ]; then
   ARROW="⇈"
-elif [ $DIFF -gt 7 ]; then
+elif [ $DIFF -gt 6 ]; then
   ARROW="🠑"
 elif [ $DIFF -gt 2 ]; then
   ARROW="⬈"
 elif [ $DIFF -ge -2 ]; then
   ARROW="🠒"
-elif [ $DIFF -ge -7 ]; then
+elif [ $DIFF -ge -6 ]; then
   ARROW="⬊"
 elif [ $DIFF -ge -12 ]; then
   ARROW="🠓"
