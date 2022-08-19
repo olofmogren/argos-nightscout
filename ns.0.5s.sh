@@ -139,7 +139,7 @@ if [ $INCLUDE_PUMP_INFO == 'true' ]; then
   if [ $BASAL == 'null' ]; then
     BASAL=$(echo $DEVICESTATUS | jq '.[0].pump.extended.BaseBasalRate')
   fi
-  LC_NUMERIC="en_US.UTF-8" printf "Current basal rate: %.2f /hU | font=monospace \n" $BASAL
+  LC_NUMERIC="en_US.UTF-8" printf "Current basal rate: %.2f U/h | font=monospace \n" $BASAL
 
   COB=$(echo $DEVICESTATUS | jq '.[0].openaps.suggested.COB')
 
