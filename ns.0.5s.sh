@@ -146,7 +146,7 @@ if [ $INCLUDE_PUMP_INFO == 'true' ]; then
   if [ $COB == "null" ]; then
     COB="0.0"
   fi
-  LC_NUMERIC="en_US.UTF-8" printf "COB:                %d g | font=monospace \n" $COB
+  LC_NUMERIC="en_US.UTF-8" printf "COB:                %.0f g | font=monospace \n" $COB
 
   IOB=$(echo $DEVICESTATUS | jq '.[0].openaps.iob.iob')
 
