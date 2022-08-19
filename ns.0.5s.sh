@@ -6,6 +6,7 @@ UNIT="MMOLL" # MMOLL or MGDL
 
 SGVFILE=".ns-latest-sgv.txt"
 SGVFILEHIST=".ns-latest-sgv-5mins.txt"
+DEVICESTATUSFILE=".ns-devicestatus.txt"
 
 CURTIME=$(date +%s)
 MTIME=$(expr $CURTIME - 10 \* 60)
@@ -13,6 +14,8 @@ SGV="-1.0" #default value for allowing script to run when not initialized the SG
 SGVHIST=0.0
 
 UPDATEEVERY=282
+
+INCLUDE_PUMP_INFO=true
 
 if test -f "$SGVFILE"; then
   MTIME=$(date +%s -r $SGVFILE)
@@ -104,5 +107,58 @@ echo "$PRINTSGV $ARROW <span color='$COLOR'>($PRINTAGE)</span>"
 # SHOW THE DIFF IN A POPUP MENU
 PRINTDIFF=$(python -c "print('{:.1f}'.format($DIFF/10.0))")
 echo '---'
-echo "Delta: $PRINTDIFF" 
+echo "Delta:              $PRINTDIFF | font=monospace" 
 
+if [ $INCLUDE_PUMP_INFO == 'true' ]; then
+  DEVICESTATUS=""
+  if [ "$AGE" -lt "$UPDATEEVERY" ]; then
+    if test -f "$DEVICESTATUSFILE"; then
+      #echo "Using cached device status."
+      DEVICESTATUS=$(cat $DEVICESTATUSFILE)
+    fi
+  fi
+  if [ "$DEVICESTATUS" == "" ]; then
+    #echo "Updating device status."
+    DEVICESTATUS=$(curl -s "$HOST/api/v1/devicestatus.json?secret=$SECRET&find\[pump\]\[\$exists\]=true&count=1")
+    echo $DEVICESTATUS > $DEVICESTATUSFILE
+  fi
+
+
+  #echo $DEVICESTATUS
+
+  echo '---'
+
+  PROFILE=$(echo $DEVICESTATUS | jq '.[0].pump.extended.ActiveProfile')
+  PROFILE=${PROFILE:1:-1}
+  echo "Profile:            $PROFILE | font=monospace "
+
+  RESERVOIR=$(echo $DEVICESTATUS | jq '.[0].pump.reservoir')
+  echo "Reservoir level:    $RESERVOIR U | font=monospace "
+
+  BASAL=$(echo $DEVICESTATUS | jq '.[0].pump.extended.TempBasalAbsoluteRate')
+  if [ $BASAL == 'null' ]; then
+    BASAL=$(echo $DEVICESTATUS | jq '.[0].pump.extended.BaseBasalRate')
+  fi
+  LC_NUMERIC="en_US.UTF-8" printf "Current basal rate: %.2f /hU | font=monospace \n" $BASAL
+
+  COB=$(echo $DEVICESTATUS | jq '.[0].openaps.suggested.COB')
+
+  if [ $COB == "null" ]; then
+    COB="0.0"
+  fi
+  LC_NUMERIC="en_US.UTF-8" printf "COB:                %.1f g | font=monospace \n" $COB
+
+  IOB=$(echo $DEVICESTATUS | jq '.[0].openaps.iob.iob')
+
+  if [ $IOB == "null" ]; then
+    IOB="0.0"
+  fi
+  LC_NUMERIC="en_US.UTF-8" printf "IOB:                %.2f U | font=monospace \n" $IOB
+fi
+
+echo '---'
+
+#echo $MTIME
+MTIME_READABLE=$(date -d @$MTIME "+%Y-%m-%d %H:%M")
+
+echo "Updated             $MTIME_READABLE | font=monospace"
