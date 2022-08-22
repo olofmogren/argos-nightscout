@@ -14,6 +14,7 @@ SGV="-1.0" #default value for allowing script to run when not initialized the SG
 SGVHIST=0.0
 
 UPDATEEVERY=282
+WAITFORPUMPUPDATE=20
 
 INCLUDE_PUMP_INFO=true
 
@@ -70,18 +71,20 @@ else
 fi
 
 # DECIDE DIFF
-DIFF=$(python -c "print('{:d}'.format(int(0.5+10*($PRINTSGV - $SGVHIST))))")
+#echo $PRINTSGV
+#echo $SGVHIST
+DIFF=$(python -c "print('{:d}'.format(int(0.5+10*$PRINTSGV - 10*$SGVHIST)))")
 ARROW="🠒"
 #echo $DIFF
 if [ $DIFF -gt 12 ]; then
   ARROW="⇈"
-elif [ $DIFF -gt 6 ]; then
+elif [ $DIFF -gt 5 ]; then
   ARROW="🠑"
 elif [ $DIFF -gt 2 ]; then
   ARROW="↗"
 elif [ $DIFF -ge -2 ]; then
   ARROW="🠒"
-elif [ $DIFF -ge -6 ]; then
+elif [ $DIFF -ge -5 ]; then
   ARROW="↘"
 elif [ $DIFF -ge -12 ]; then
   ARROW="🠓"
@@ -111,7 +114,7 @@ echo "Delta              $PRINTDIFF | font=monospace"
 
 if [ $INCLUDE_PUMP_INFO == 'true' ]; then
   DEVICESTATUS=""
-  if [ "$AGE" -lt "$UPDATEEVERY" ]; then
+  if ( [ "$AGE" -lt "$UPDATEEVERY" ] && [ "$AGE" -gt "$WAITFORPUMPUPDATE" ] ); then
     if test -f "$DEVICESTATUSFILE"; then
       #echo "Using cached device status."
       DEVICESTATUS=$(cat $DEVICESTATUSFILE)
@@ -163,7 +166,8 @@ fi
 echo '---'
 
 #echo $MTIME
-if [ "$AGE" -gt "$UPDATEEVERY" ]; then
+let DOUBLEINTERVAL=$UPDATEEVERY+$UPDATEEVERY
+if [ "$AGE" -gt "$DOUBLEINTERVAL" ]; then
   MTIME_READABLE=$(date -d @$MTIME "+%Y-%m-%d %H:%M")
   echo "Updated            $MTIME_READABLE | font=monospace"
 else
