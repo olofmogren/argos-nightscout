@@ -107,7 +107,7 @@ echo "$PRINTSGV $ARROW <span color='$COLOR'>($PRINTAGE)</span>"
 # SHOW THE DIFF IN A POPUP MENU
 PRINTDIFF=$(python -c "print('{:.1f}'.format($DIFF/10.0))")
 echo '---'
-echo "Delta:              $PRINTDIFF | font=monospace" 
+echo "Delta              $PRINTDIFF | font=monospace" 
 
 if [ $INCLUDE_PUMP_INFO == 'true' ]; then
   DEVICESTATUS=""
@@ -130,35 +130,43 @@ if [ $INCLUDE_PUMP_INFO == 'true' ]; then
 
   PROFILE=$(echo $DEVICESTATUS | jq '.[0].pump.extended.ActiveProfile')
   PROFILE=${PROFILE:1:-1}
-  echo "Profile:            $PROFILE | font=monospace "
+  echo "Profile            $PROFILE | font=monospace "
 
   RESERVOIR=$(echo $DEVICESTATUS | jq '.[0].pump.reservoir')
-  echo "Reservoir level:    $RESERVOIR U | font=monospace "
+  echo "Reservoir level    $RESERVOIR U | font=monospace "
 
   BASAL=$(echo $DEVICESTATUS | jq '.[0].pump.extended.TempBasalAbsoluteRate')
   if [ $BASAL == 'null' ]; then
     BASAL=$(echo $DEVICESTATUS | jq '.[0].pump.extended.BaseBasalRate')
   fi
-  LC_NUMERIC="en_US.UTF-8" printf "Current basal rate: %.2f U/h | font=monospace \n" $BASAL
+  BASALPERCENT=$(echo $DEVICESTATUS | jq '.[0].pump.extended.TempBasalPercent')
+  if [ $BASALPERCENT == 'null' ]; then
+    BASALPERCENT="100"
+  fi
+  LC_NUMERIC="en_US.UTF-8" printf "Current basal rate %.2f U/h (%.0f%%) | font=monospace \n" $BASAL $BASALPERCENT
 
   COB=$(echo $DEVICESTATUS | jq '.[0].openaps.suggested.COB')
 
   if [ $COB == "null" ]; then
     COB="0.0"
   fi
-  LC_NUMERIC="en_US.UTF-8" printf "COB:                %.0f g | font=monospace \n" $COB
+  LC_NUMERIC="en_US.UTF-8" printf "COB                %.0f g | font=monospace \n" $COB
 
   IOB=$(echo $DEVICESTATUS | jq '.[0].openaps.iob.iob')
 
   if [ $IOB == "null" ]; then
     IOB="0.0"
   fi
-  LC_NUMERIC="en_US.UTF-8" printf "IOB:                %.2f U | font=monospace \n" $IOB
+  LC_NUMERIC="en_US.UTF-8" printf "IOB                %.2f U | font=monospace \n" $IOB
 fi
 
 echo '---'
 
 #echo $MTIME
-MTIME_READABLE=$(date -d @$MTIME "+%Y-%m-%d %H:%M")
-
-echo "Updated             $MTIME_READABLE | font=monospace"
+if [ "$AGE" -gt "$UPDATEEVERY" ]; then
+  MTIME_READABLE=$(date -d @$MTIME "+%Y-%m-%d %H:%M")
+  echo "Updated            $MTIME_READABLE | font=monospace"
+else
+  MTIME_READABLE=$(date -d @$MTIME "+%H:%M")
+  echo "Updated            $MTIME_READABLE | font=monospace"
+fi
