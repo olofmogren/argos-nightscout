@@ -38,7 +38,7 @@ if [ "$AGE" -lt "$UPDATEEVERY" ]; then
   PRINTAGE="$AGEMINUTES"
   COLOR="#090"
 else
-  RESPONSE=$(wget --quiet -O- "$HOST/api/v1/entries/sgv.json?secret=$SECRET&count=1")
+  RESPONSE=$(curl -s "$HOST/api/v1/entries/sgv.json?secret=$SECRET&count=1")
   if [ -z "$RESPONSE" ]; then
     PRINTSGV="$SGV"
     PRINTAGE="$AGEMINUTES"
@@ -73,7 +73,7 @@ fi
 # DECIDE DIFF
 #echo $PRINTSGV
 #echo $SGVHIST
-DIFF=$(python -c "print('{:d}'.format(int(0.5+10*$PRINTSGV - 10*$SGVHIST)))")
+DIFF=$(python -c "print('{:d}'.format(int(0.5 + 10*$PRINTSGV - 10*$SGVHIST)))")
 ARROW="🠒"
 #echo $DIFF
 if [ $DIFF -gt 12 ]; then
@@ -112,7 +112,7 @@ PRINTDIFF=$(python -c "print('{:.1f}'.format($DIFF/10.0))")
 echo '---'
 echo "Delta              $PRINTDIFF | font=monospace" 
 
-if [ $INCLUDE_PUMP_INFO == 'true' ]; then
+if [ $INCLUDE_PUMP_INFO = "true" ]; then
   DEVICESTATUS=""
   if ( [ "$AGE" -lt "$UPDATEEVERY" ] && [ "$AGE" -gt "$WAITFORPUMPUPDATE" ] ); then
     if test -f "$DEVICESTATUSFILE"; then
