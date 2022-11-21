@@ -4,6 +4,14 @@ HOST="---SET_YOUR_NIGHTSCOUT_HOSTNAME_HERE---"
 SECRET="---SET_YOUR_NIGHTSCOUT_SECRET_HERE---"
 UNIT="MMOLL" # MMOLL or MGDL
 
+if [[ "$HOST" == "---SET_YOUR_NIGHTSCOUT_HOSTNAME_HERE---" ||
+      "$SECRET" == "---SET_YOUR_NIGHTSCOUT_SECRET_HERE--" ]]; then
+    echo "CLICK!"
+    echo "---"
+    echo "Your argos ns script needs to be configured with HOST and SECRET."
+    exit
+fi
+
 SGVFILE=".ns-latest-sgv.txt"
 SGVFILEHIST=".ns-latest-sgv-5mins.txt"
 DEVICESTATUSFILE=".ns-devicestatus.txt"
@@ -74,22 +82,22 @@ fi
 #echo $PRINTSGV
 #echo $SGVHIST
 DIFF=$(python -c "print('{:d}'.format(int(0.5 + 10*$PRINTSGV - 10*$SGVHIST)))")
-ARROW="🠒"
+ARROW="→"
 #echo $DIFF
 if [ $DIFF -gt 12 ]; then
-  ARROW="⇈"
+  ARROW="↑↑"
 elif [ $DIFF -gt 5 ]; then
-  ARROW="🠑"
+  ARROW="↑"
 elif [ $DIFF -gt 2 ]; then
   ARROW="↗"
 elif [ $DIFF -ge -2 ]; then
-  ARROW="🠒"
+  ARROW="→"
 elif [ $DIFF -ge -5 ]; then
   ARROW="↘"
 elif [ $DIFF -ge -12 ]; then
-  ARROW="🠓"
+  ARROW="↓"
 else
-  ARROW="⇊"
+  ARROW="↓↓"
 fi
 
 #CHECK IF SGVHISTMTIME IS VALID FOR ARROW, IF NOT, REMOVE ARROW
